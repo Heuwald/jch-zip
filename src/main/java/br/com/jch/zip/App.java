@@ -9,14 +9,22 @@ import java.io.IOException;
  */
 public class App 
 {
-    public static void main( String[] args )
-    {
-       JchZip jchZip = new JchZip(new File("D:/testes/zipTest").toPath(), new File("D:/testes/zipado").toPath());
-       try {
-		jchZip.zip();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	public static void main( String[] args )
+	{
+		//		JchZip jchZip = new JchZip(new File("D:/testes/zipTest").toPath(), new File("D:/testes/zipado").toPath());
+		//		try {
+		//			jchZip.zip();
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
+
+		JchUnzip jchZip = new JchUnzip();
+		try {
+			jchZip.unzip(new File("D:/testes/zipado.zip").toPath(), new File("D:/testes/zipado").toPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-    }
 }

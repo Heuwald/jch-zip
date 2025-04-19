@@ -10,17 +10,10 @@ import java.util.zip.ZipOutputStream;
 
 public class JchZip {
 
-	private Path pathFileToZip, pathOutputFile;
-
 	private FileOutputStream fos;
 	private ZipOutputStream zipOut;
 
-	public JchZip(Path pathFileToZip, Path pathOutputFile) {
-		this.pathFileToZip = pathFileToZip;
-		this.pathOutputFile = pathOutputFile;
-	}
-
-	public void zip() throws IOException {
+	public void zip(Path pathFileToZip, Path pathOutputFile) throws IOException {
 
 		String fileName = pathOutputFile.getFileName().toString();
 

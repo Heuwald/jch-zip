@@ -7,76 +7,60 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 public class JchUnzip {
 
-	private Path pathFileToUnzip, pathOutputFile;
+	private FileInputStream fin;
+	private ZipInputStream zipIn;
 
-	private FileOutputStream fos;
-	private ZipInputStream zipOut;
+	public void unzip(Path filePathToUnzip, Path dirPathOutput) throws IOException {
 
-	public JchUnzip(Path pathFileToUnzip, Path pathOutputFile) {
-		this.pathFileToUnzip = pathFileToUnzip;
-		this.pathOutputFile = pathOutputFile;
-	}
+		fin = new FileInputStream(filePathToUnzip.toString());
+		zipIn = new ZipInputStream(fin);
 
-	public void unzip() throws IOException {
-
-		String fileName = pathOutputFile.getFileName().toString();
-
-		fileName = fileName.endsWith(".zip") ? fileName : fileName + ".zip";
-
-		fos = new FileOutputStream(pathOutputFile.getParent().resolve(fileName).toString());
-		zipOut = new ZipOutputStream(fos);
-
-		File fileToZip = new File(pathFileToZip.toString());
-		zipFile(fileToZip, fileToZip.toPath().getFileName(), zipOut);
+		unZipFile(dirPathOutput);
 		close();
 	}
 
 	private void close() throws IOException {
-		if(zipOut != null) {
-			zipOut.close();
+		if(zipIn != null) {
+			zipIn.close();
 		}
 
-		if(zipOut != null) {
-			fos.close();
+		if(zipIn != null) {
+			fin.close();
 		}
 	}
 
-	private void zipFile(File fileToZip, Path fileRelativePath, ZipOutputStream zipOut) throws IOException {
-		if (fileToZip.isHidden()) {
-			return;
-		}
-		
-		ZipEntry zipEntry = new ZipEntry(fileRelativePath.toString());
-		
-		if (fileToZip.isDirectory()) {
+	private void unZipFile(Path relativePath) throws IOException {
+		ZipEntry entry = null;
+		while((entry = zipIn.getNextEntry()) != null) {
+			System.out.println("extraindo: " + entry.getName());
 
-//			zipEntry.setMethod(ZipEntry.STORED);
-//			zipEntry.setSize(0);
-//			zipEntry.setCrc(0);
-//			zipOut.putNextEntry(zipEntry);
-//			zipOut.closeEntry();
+			Path filePath = relativePath.resolve(entry.getName());
+			Path fileParentDir = filePath.getParent();
 
-			File[] children = fileToZip.listFiles();
-			for (File childFile : children) {
-				zipFile(childFile, fileRelativePath.resolve(childFile.getName()), zipOut);
+			File file = new File(filePath.toString());
+			File parentDir = new File(fileParentDir.toString());
+
+			parentDir.mkdirs();
+
+			if(file.createNewFile()) {
+				FileOutputStream fos = new FileOutputStream(file);
+
+				byte[] bytes = new byte[1024];
+
+				int nBytes = 0;
+
+				while ((nBytes = zipIn.read(bytes)) >= 0) {
+					fos.write(bytes, 0, nBytes);
+				}
+
+				fos.flush();
+				fos.close();
 			}
-			
-		} else {
-			
-			FileInputStream fis = new FileInputStream(fileToZip);
 
-			zipOut.putNextEntry(zipEntry);
-			byte[] bytes = new byte[1024];
-			int length;
-			while ((length = fis.read(bytes)) >= 0) {
-				zipOut.write(bytes, 0, length);
-			}
-			fis.close();
-			
+			zipIn.closeEntry();
 		}
 	}
 }
